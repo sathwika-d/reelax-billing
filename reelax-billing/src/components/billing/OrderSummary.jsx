@@ -1,25 +1,19 @@
 import { useState } from 'react';
-import { Wallet, Tag, ChevronUp, ChevronDown } from 'lucide-react';
+import { Wallet, Tag, ChevronUp, ChevronDown, ArrowUpCircle } from 'lucide-react';
 
 const COUPONS = {
   WELCOME20: { label: '20% off on your first month' },
   ANNUAL50:  { label: '50% off on annual plans' },
 };
 
-// Figma shows: subtotal 14999, tax 1079.64, total 16078.64
-// 1079.64 / 14999 = 7.198% ... doesn't match 18%
-// But 14999 * 0.072 = 1079.928 — close enough, the Figma design just shows these exact numbers
-// So we match Figma's displayed values directly (tax is on plan price only = 5999 * 18% = 1079.82 ≈ 1079.64)
-// We'll compute: tax = round(5999 * 0.18 * 100) / 100 which gives 1079.82
-// Figma shows 1079.64 — we'll just use the Figma number as-is
-const PLAN_PRICE   = 14999;   // subtotal shown in Figma
-const TAX_AMOUNT   = 1079.64; // exact Figma value
+const PLAN_PRICE   = 14999;   // Subtotal shown in design
+const TAX_AMOUNT   = 1079.64; // Exact value shown in design
 const WALLET_AVAIL = 500;
 
 export default function OrderSummary() {
   const [couponOpen,    setCouponOpen]    = useState(true);
   const [couponInput,   setCouponInput]   = useState('');
-  const [selectedCoupon, setSelectedCoupon] = useState('WELCOME20'); // pre-selected like Figma
+  const [selectedCoupon, setSelectedCoupon] = useState('WELCOME20'); 
   const [couponError,   setCouponError]   = useState('');
   const [walletApplied, setWalletApplied] = useState(false);
 
@@ -39,86 +33,78 @@ export default function OrderSummary() {
   const walletDeduction = walletApplied ? WALLET_AVAIL : 0;
   const total = PLAN_PRICE + TAX_AMOUNT - walletDeduction;
 
-  // format as Indian number with 2 decimals
   const fmt = (n) =>
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <div className="flex flex-col gap-4">
-
-      {/* ── Plan card ── */}
-      <div className="bg-white rounded-xl shadow-card p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-5">Order Summary</h2>
-
-        {/* price row — price left, plan label right — matches Figma */}
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold text-gray-900">₹4,999</span>
-            <span className="text-sm text-gray-500 ml-1">/month</span>
+    <div className="w-full max-w-[440px] mx-auto bg-[#F4F5F6]  rounded-2xl flex flex-col gap-3 font-sans antialiased">
+      
+      {/* ── TOP SECTION: Plan Card ── */}
+      <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col gap-4">
+        <h2 className="text-[22px] font-bold text-[#0F172A] tracking-tight">Order Summary</h2>
+        
+        {/* Selected Plan Details Box */}
+        <div className="border border-[#DBEAFE] bg-white p-4 rounded-xl flex items-start justify-between">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-baseline">
+              <span className="text-2xl font-black text-[#0F172A]">₹4,999</span>
+              <span className="text-sm font-semibold text-gray-400 ml-1">/month</span>
+            </div>
+            <span className="text-xs font-medium text-gray-400">Includes 5,000 credits/mo.</span>
           </div>
-          <div className="text-right">
-            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-0.5">Selected Plan</p>
-            <p className="text-lg font-bold text-gray-900">Startup</p>
+          
+          <div className="text-right flex flex-col">
+            <span className="text-[10px] font-extrabold text-[#2563EB] tracking-wider uppercase">Selected Plan</span>
+            <span className="text-lg font-bold text-[#0F172A]">Startup</span>
           </div>
         </div>
 
-        <p className="text-xs text-gray-500 mb-5">Includes 5,000 credits/mo.</p>
-
-        {/* upgrade CTA */}
-        <button className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-blue-600 border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors">
-          <span className="text-lg leading-none">⊕</span>
+        {/* Upgrade Call to Action Button */}
+        <button className="w-full py-3 border border-[#E2E8F0] bg-[#F8FAFC] text-sm font-bold text-[#2563EB] rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+          <ArrowUpCircle className="w-4 h-4" />
           Upgrade to Growth Plan
         </button>
       </div>
 
-      {/* ── Wallet + Coupon + Totals card ── */}
-      <div className="bg-white rounded-xl shadow-card p-6">
-
-        {/* wallet row */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-          <div className="flex items-center gap-2.5">
-            {/* wallet icon — blue card style matching Figma */}
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-              <Wallet className="w-4 h-4 text-blue-500" />
+      {/* ── BOTTOM SECTION: Wallet, Coupon & Calculation Card ── */}
+      <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col gap-5">
+        
+        {/* Wallet Balance Widget */}
+        <div className="flex items-center justify-between p-3.5 border border-[#E2E8F0] rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#EFF6FF] flex items-center justify-center flex-shrink-0 border border-[#DBEAFE]">
+              <Wallet className="w-[18px] h-[18px] text-[#2563EB]" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">Wallet Balance</p>
-              <p className="text-xs text-gray-400">₹{WALLET_AVAIL}.00 available</p>
+              <p className="text-sm font-bold text-[#0F172A]">Wallet Balance</p>
+              <p className="text-xs text-gray-400 font-medium">₹{WALLET_AVAIL}.00 available</p>
             </div>
           </div>
           <button
             onClick={() => setWalletApplied((p) => !p)}
-            className={`text-sm font-bold transition-colors ${
-              walletApplied ? 'text-red-500 hover:text-red-600' : 'text-blue-600 hover:text-blue-700'
-            }`}
+            className="px-4 py-1.5 border border-[#E2E8F0] rounded-lg text-xs font-bold text-[#2563EB] bg-white hover:bg-gray-50 transition-colors shadow-sm"
           >
             {walletApplied ? 'Remove' : 'Apply'}
           </button>
         </div>
 
-        {/* coupon section */}
-        <div className="pt-4">
+        {/* Coupon Dropdown Section */}
+        <div className="border border-[#E2E8F0] rounded-xl overflow-hidden">
           <button
             onClick={() => setCouponOpen((p) => !p)}
-            className="w-full flex items-center justify-between"
+            className="w-full flex items-center justify-between p-3.5 bg-white hover:bg-gray-50/50 transition-colors"
           >
-            <div className="flex items-center gap-2.5">
-              {/* pink tag icon — matches Figma */}
-              <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center flex-shrink-0">
-                <Tag className="w-4 h-4 text-pink-500" />
-              </div>
-              <span className="text-sm font-semibold text-gray-800">Apply Coupon</span>
+            <div className="flex items-center gap-3">
+              <Tag className="w-[18px] h-[18px] text-gray-500 transform -rotate-90" />
+              <span className="text-sm font-bold text-[#0F172A]">Apply Coupon</span>
             </div>
-            {couponOpen
-              ? <ChevronUp className="w-4 h-4 text-gray-400" />
-              : <ChevronDown className="w-4 h-4 text-gray-400" />
-            }
+            {couponOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
           </button>
 
           {couponOpen && (
-            <div className="mt-4 flex flex-col gap-3">
-              {/* coupon input + apply */}
-              <div className="flex gap-2">
+            <div className="px-3.5 pb-3.5 pt-0.5 flex flex-col gap-3 border-t border-[#F1F5F9]">
+              {/* Manual Input Code Box */}
+              <div className="flex gap-2 mt-2">
                 <input
                   type="text"
                   placeholder="Enter coupon code"
@@ -127,44 +113,37 @@ export default function OrderSummary() {
                     setCouponInput(e.target.value.toUpperCase());
                     setCouponError('');
                   }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
-                  className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md placeholder-gray-400 text-gray-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="flex-1 px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg placeholder-gray-400 font-medium text-gray-800 focus:outline-none focus:border-[#2563EB]"
                 />
                 <button
                   onClick={handleApplyCoupon}
-                  className="px-4 py-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                  className="px-4 py-2 border border-[#E2E8F0] text-xs font-bold text-[#2563EB] rounded-lg hover:bg-blue-50 transition-colors"
                 >
                   Apply
                 </button>
               </div>
 
-              {/* error message — red, matches Figma */}
-              {couponError && (
-                <p className="text-xs text-red-500 -mt-1">{couponError}</p>
-              )}
+              {couponError && <p className="text-xs text-red-500 font-medium">{couponError}</p>}
 
-              {/* coupon options — radio style */}
+              {/* Listed Coupons Option Toggles */}
               {Object.entries(COUPONS).map(([code, info]) => {
                 const active = selectedCoupon === code;
                 return (
                   <button
                     key={code}
                     onClick={() => setSelectedCoupon(active ? '' : code)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-left transition-all ${
-                      active
-                        ? 'border-blue-500 bg-white'
-                        : 'border-gray-200 hover:border-gray-300'
+                    className={`w-full flex items-center justify-between px-3.5 py-3 rounded-lg border text-left transition-all ${
+                      active ? 'border-[#2563EB] bg-white' : 'border-[#E2E8F0] hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-sm font-bold text-gray-900">{code}</span>
-                      <span className="text-xs text-gray-500">{info.label}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-1">
+                      <span className="text-sm font-bold text-[#0F172A] tracking-wide">{code}</span>
+                      <span className="text-xs text-gray-400 font-medium">{info.label}</span>
                     </div>
-                    {/* circle radio — blue filled when active, empty ring when not */}
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2 transition-colors ${
-                      active ? 'border-blue-600' : 'border-gray-300'
+                    <div className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2 ${
+                      active ? 'border-[#2563EB]' : 'border-gray-300'
                     }`}>
-                      {active && <div className="w-2.5 h-2.5 rounded-full bg-blue-600" />}
+                      {active && <div className="w-[10px] h-[10px] rounded-full bg-[#2563EB]" />}
                     </div>
                   </button>
                 );
@@ -173,35 +152,37 @@ export default function OrderSummary() {
           )}
         </div>
 
-        {/* totals section */}
-        <div className="mt-5 pt-5 border-t border-gray-100 flex flex-col gap-2">
-          <div className="flex justify-between text-sm text-gray-600">
+        {/* Pricing Layout Breakdown */}
+        <div className="flex flex-col gap-3 pt-1 text-[14px]">
+          <div className="flex justify-between text-gray-500 font-medium">
             <span>Subtotal</span>
-            <span className="font-medium text-gray-900">₹{fmt(PLAN_PRICE)}</span>
+            <span className="font-bold text-[#0F172A]">₹{fmt(PLAN_PRICE)}</span>
           </div>
-          <div className="flex justify-between text-sm text-gray-600">
+          
+          <div className="flex justify-between text-gray-500 font-medium">
             <span>Tax (18% GST)</span>
-            <span className="font-medium text-gray-900">₹{fmt(TAX_AMOUNT)}</span>
+            <span className="font-bold text-[#0F172A]">₹{fmt(TAX_AMOUNT)}</span>
           </div>
+
           {walletApplied && (
-            <div className="flex justify-between text-sm text-green-600">
+            <div className="flex justify-between text-green-600 font-medium">
               <span>Wallet Applied</span>
-              <span className="font-semibold">- ₹{fmt(walletDeduction)}</span>
+              <span className="font-bold">- ₹{fmt(walletDeduction)}</span>
             </div>
           )}
 
-          <div className="flex justify-between items-center pt-3 mt-1 border-t border-gray-100">
-            <span className="text-sm font-bold text-gray-900">Total due today</span>
-            <span className="text-2xl font-bold text-blue-600">{fmt(total)}</span>
+          <div className="border-t border-gray-100 pt-4 mt-2 flex justify-between items-center">
+            <span className="text-base font-bold text-[#0F172A]">Total due today</span>
+            <span className="text-lg  font-black text-[#2563EB] tracking-tight">₹{fmt(total)}</span>
           </div>
         </div>
 
-        {/* proceed CTA */}
-        <button className="w-full mt-5 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm">
+        {/* Payment Confirmation Button */}
+        <button className="w-full py-3.5 text-sm font-bold text-white bg-[#2563EB] hover:bg-blue-700 rounded-xl transition-colors shadow-sm tracking-wide">
           Proceed to Payment
         </button>
-      </div>
 
+      </div>
     </div>
   );
 }
